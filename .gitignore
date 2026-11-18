@@ -1,0 +1,42 @@
+# Sanal Ortamlar (Virtual Environments)
+.venv/
+venv/
+env/
+ENV/
+
+# Python Önbellek ve Derlenmiş Dosyalar
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Ortam Değişkenleri ve Gizli Anahtarlar (API Key vb.)
+.env
+.env.*
+*.pem
+*.key
+
+# Dağıtım ve Paketleme
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Test ve Kapsam (Coverage) Raporları
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE ve Editör Ayarları
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# İşletim Sistemi Dosyaları
+.DS_Store
+Thumbs.db
+
+.opencode
+graphify-out/
