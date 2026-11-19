@@ -5,7 +5,7 @@ Obsidian notlarını otomatik olarak Docusaurus blog'una (Türkçe + İngilizce)
 ## Kullanım
 
 ```bash
-python main.py "<obsidian path>/<file name>.md" --slug YYYY-MM-DD-slug-name
+python main.py "<obsidian path>/<file name>.md" --slug YYYY-MM-DD-slug-name --tags tag1,tag2
 ```
 
 - **Argüman:** Notun `.md` dosya yolu (Obsidian klasöründen geçerli yol)
