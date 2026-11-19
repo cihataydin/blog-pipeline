@@ -202,27 +202,41 @@ def translate_with_gemini(tr_content: str, feedback: str | None = None, prev_en:
 
     raise Exception(f"Hem Google hem de Docker'daki lokal modeller başarısız oldu. Son hata: {last_local_err}")
 
-def generate_front_matter_from_slug(slug: str, raw_content: str) -> tuple[dict, str]:
+FRONTMATTER_PATTERN = re.compile(r"^---\n[\s\S]*?\n---\n*", re.MULTILINE)
+
+def _strip_frontmatter(content: str) -> str:
+    """İçerikte var olan eski frontmatter bloğunu kaldırır (tekrar üretim için)."""
+    stripped = FRONTMATTER_PATTERN.sub("", content, count=1)
+    return stripped.lstrip("\n").lstrip("\r")
+
+def generate_front_matter_from_slug(slug: str, raw_content: str, tags: list[str] | None = None) -> tuple[dict, str]:
     """
-    Parametre olarak verilen slug bilgisinden otomatik title üretir, 
-    date alanını atar ve temiz gövdeyi döndürür.
+    Parametre olarak verilen slug bilgisinden otomatik title üretir,
+    kullanıcıdan gelen etiketleri (tags) alır ve Docusaurus frontmatter bloğunu
+    içeriğin başına ekleyip temiz gövdeyi döndürür.
     """
+    # Slug'tan tarih prefixini ("2026-11-18-") ayır; header'da tarih istemiyorum, klasör ismi aynen kalır
+    clean_slug = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", slug)
     # Slug'ı okunabilir başlığa çevir (örn: "deep-learning-intro" -> "Deep Learning Intro")
-    title = slug.replace("-", " ").title()
+    title = clean_slug.replace("-", " ").title()
     
-    # Otomatik basit etiketler türet
-    tags = ["blog", "tech"]
-    if "python" in raw_content.lower():
-        tags.append("python")
-    if "docker" in raw_content.lower():
-        tags.append("docker")
-    if "ai" in raw_content.lower() or "yapay" in raw_content.lower():
-        tags.append("ai")
+    if tags is None:
+        tags = []
+
+    fm_block = (
+        "---\n"
+        f"slug: {clean_slug}\n"
+        f"title: {title}\n"
+        f"tags: [{', '.join(str(t) for t in tags)}]\n"
+        "---\n\n"
+    )
+
+    final_content = fm_block + _strip_frontmatter(raw_content)
 
     front_matter = {
-        "slug": slug,
+        "slug": clean_slug,
         "title": title,
-        "tags": str(tags).replace("'", '"')
+        "tags": tags,
     }
     
-    return front_matter, raw_content
+    return front_matter, final_content

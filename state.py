@@ -8,3 +8,4 @@ class BlogAgentState(TypedDict):
     copied_assets: List[str]     # Taşınan SVG/PNG dosyalarının isimleri
     feedback: Optional[str]      # Kullanıcı lokalde beğenmezse gireceği düzeltme notu
     is_approved: bool            # Lokal önizleme onayı (True/False)
+    tags: Optional[List[str]]   # Kullanıcıdan alınan blog etiketleri

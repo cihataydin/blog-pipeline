@@ -1,6 +1,7 @@
 import typer
 from datetime import date
 from pathlib import Path
+from typing import List, Optional
 from graph import build_blog_graph
 
 app = typer.Typer(help="Obsidian notlarını Docusaurus'a taşıyan otonom yayınlama agent'ı.")
@@ -9,6 +10,7 @@ app = typer.Typer(help="Obsidian notlarını Docusaurus'a taşıyan otonom yayı
 def publish(
     markdown_path: str = typer.Argument(..., help="Obsidian'daki .md dosyasının yolu"),
     slug: str = typer.Option(None, "--slug", "-s", help="Örn: 2026-11-18-my-first-blog-writing"),
+    tags: Optional[str] = typer.Option(None, "--tags", "-t", help="Blog etiketleri (virgülle ayırılacak, örn: system-design,ai). Boş bırakılırsa sizden sorulur."),
 ):
     """
     Obsidian yazısını işler, görselleri taşır, Gemini ile İngilizceye çevirir ve lokalde önizlemeye açar.
@@ -23,7 +25,15 @@ def publish(
         today_str = date.today().isoformat()
         slug = f"{today_str}-{clean_name}"
 
+    if tags:
+        blog_tags: Optional[List[str]] = [t.strip() for t in tags.split(",") if t.strip()]
+    else:
+        tags_input = typer.prompt("Blog etiketleri (virgülle ayır, örn: system-design,ai)", default="")
+        blog_tags = [t.strip() for t in tags_input.split(",") if t.strip()] if tags_input.strip() else None
+
     typer.secho(f"🤖 blog-pipeline başlatılıyor | Hedef Slug: {slug}", fg=typer.colors.CYAN, bold=True)
+    if blog_tags:
+        typer.secho(f"🏷️  Kullanılacak etiketler: {', '.join(blog_tags)}", fg=typer.colors.YELLOW)
 
     graph = build_blog_graph()
     
@@ -35,6 +45,7 @@ def publish(
         "copied_assets": [],
         "feedback": None,
         "is_approved": False,
+        "tags": blog_tags,
     }
 
     final_state = graph.invoke(initial_state)

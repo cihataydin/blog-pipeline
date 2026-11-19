@@ -5,6 +5,7 @@ from state import BlogAgentState
 from tools import (
     process_markdown_and_assets,
     translate_with_gemini,
+    generate_front_matter_from_slug,
     TR_BLOG_DIR,
     EN_BLOG_DIR,
     DOCUSAURUS_ROOT,
@@ -33,12 +34,16 @@ def translate_node(state: BlogAgentState) -> dict:
 def write_files_node(state: BlogAgentState) -> dict:
     print(f"\n[3/4] 💾 Dosyalar Docusaurus dizinlerine yazılıyor...")
     slug = state["slug"]
+    tags = state.get("tags")
+    
+    tr_front_matter, tr_final_content = generate_front_matter_from_slug(slug, state["tr_content"], tags)
+    en_front_matter, en_final_content = generate_front_matter_from_slug(slug, state.get("en_content") or "", tags)
     
     tr_file = TR_BLOG_DIR / slug / "index.md"
     en_file = EN_BLOG_DIR / slug / "index.md"
     
-    tr_file.write_text(state["tr_content"], encoding="utf-8")
-    en_file.write_text(state["en_content"], encoding="utf-8")
+    tr_file.write_text(tr_final_content, encoding="utf-8")
+    en_file.write_text(en_final_content, encoding="utf-8")
     
     print(f"      ↳ TR: {tr_file}")
     print(f"      ↳ EN: {en_file}")
